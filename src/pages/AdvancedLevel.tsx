@@ -13,33 +13,51 @@ const AdvancedLevel = () => {
       importance: "Kritik"
     },
     {
-      title: "IDS/IPS Sistemleri",
-      description: "Trafik izleme ve saldırı tespit sistemleri",
-      icon: <Activity className="w-5 h-5" />,
+      title: "Rate Limiting & DDoS Koruması",
+      description: "Brute force ve DDoS saldırılarını önleme",
+      icon: <RefreshCw className="w-5 h-5" />,
       importance: "Kritik"
     },
     {
-      title: "Rate Limiting",
-      description: "Brute force ve DDoS saldırılarını önleme",
-      icon: <RefreshCw className="w-5 h-5" />,
-      importance: "Yüksek"
-    },
-    {
       title: "İki Faktörlü Kimlik Doğrulama",
-      description: "SMS/E-posta ile ek güvenlik katmanı",
+      description: "TOTP/SMS ile ek güvenlik katmanı",
       icon: <Smartphone className="w-5 h-5" />,
       importance: "Yüksek"
     },
     {
-      title: "Güvenlik Test Araçları",
-      description: "Otomatik zafiyet tarama ve penetrasyon testleri",
+      title: "API Güvenliği",
+      description: "JWT, OAuth, API rate limiting ve güvenlik",
+      icon: <Activity className="w-5 h-5" />,
+      importance: "Kritik"
+    },
+    {
+      title: "Güvenlik İzleme & Log Analizi",
+      description: "SIEM sistemleri ve güvenlik olay izleme",
       icon: <Search className="w-5 h-5" />,
       importance: "Yüksek"
     },
     {
-      title: "Güncel Kütüphaneler",
-      description: "Framework ve bağımlılıkların düzenli güncellenmesi",
+      title: "Veritabanı Güvenlik Sertleştirme",
+      description: "DB encryption, backup güvenliği, audit logs",
       icon: <Zap className="w-5 h-5" />,
+      importance: "Kritik"
+    },
+    {
+      title: "Container & DevOps Güvenliği",
+      description: "Docker, Kubernetes güvenliği ve CI/CD pipeline",
+      icon: <Shield className="w-5 h-5" />,
+      importance: "Yüksek"
+    },
+    {
+      title: "Olay Müdahale Planı",
+      description: "Incident response ve disaster recovery",
+      icon: <Activity className="w-5 h-5" />,
+      importance: "Yüksek"
+    },
+    {
+      title: "Compliance & Audit",
+      description: "GDPR, ISO 27001, PCI DSS uyumluluğu",
+      icon: <Search className="w-5 h-5" />,
       importance: "Orta"
     }
   ];
@@ -264,74 +282,689 @@ const AdvancedLevel = () => {
           />
         </div>
 
-        {/* Security Testing */}
+        {/* API Security */}
         <div className="space-y-4">
           <h3 className="text-2xl font-semibold flex items-center space-x-2">
-            <Search className="w-6 h-6 text-primary" />
-            <span>Otomatik Güvenlik Testi</span>
+            <Activity className="w-6 h-6 text-primary" />
+            <span>API Güvenliği ve JWT Yönetimi</span>
           </h3>
           
           <CodeExample
-            title="PHP Güvenlik Tarayıcı"
-            description="Kendi projelerinizi taramak için basit güvenlik kontrol scripti."
-            secureCode={`class SecurityScanner {
-    private $results = [];
+            title="JWT Tabanlı API Güvenliği"
+            description="Güvenli JWT token oluşturma, doğrulama ve API endpoint koruması."
+            secureCode={`// ✅ JWT API Güvenlik Sistemi
+class JWTManager {
+    private $secret_key;
+    private $algorithm = 'HS256';
     
-    public function scan($directory = '.') {
-        $this->scanDirectory($directory);
-        $this->checkConfiguration();
-        $this->generateReport();
+    public function __construct() {
+        $this->secret_key = $_ENV['JWT_SECRET_KEY'] ?? bin2hex(random_bytes(32));
     }
     
-    private function scanFile($file_path) {
-        $content = file_get_contents($file_path);
+    // JWT Token oluşturma
+    public function createToken($user_id, $roles = [], $expires_in = 3600) {
+        $issued_at = time();
+        $expiration = $issued_at + $expires_in;
         
-        // SQL Injection kontrolü
-        if (preg_match('/mysql_query.*\\$/', $content)) {
-            $this->addResult('SQL_INJECTION', 'HIGH', $file_path, 
-                'Prepared statement kullanın');
-        }
-        
-        // XSS kontrolü
-        if (preg_match('/echo.*\\$_(GET|POST)/', $content)) {
-            $this->addResult('XSS', 'MEDIUM', $file_path, 
-                'htmlspecialchars() kullanın');
-        }
-        
-        // File inclusion kontrolü
-        if (preg_match('/include.*\\$_(GET|POST)/', $content)) {
-            $this->addResult('FILE_INCLUSION', 'HIGH', $file_path, 
-                'Kullanıcı kontrolündeki dosya dahil etme');
-        }
-    }
-    
-    private function checkConfiguration() {
-        $dangerous_settings = [
-            'display_errors' => ini_get('display_errors'),
-            'expose_php' => ini_get('expose_php'),
-            'allow_url_include' => ini_get('allow_url_include')
+        $payload = [
+            'iss' => $_SERVER['HTTP_HOST'], // Issuer
+            'aud' => $_SERVER['HTTP_HOST'], // Audience
+            'iat' => $issued_at,           // Issued at
+            'exp' => $expiration,          // Expiration
+            'sub' => $user_id,             // Subject (user ID)
+            'roles' => $roles,             // User roles
+            'jti' => uniqid(),             // JWT ID
         ];
         
-        foreach ($dangerous_settings as $setting => $value) {
-            if ($value == '1') {
-                $this->addResult('CONFIG', 'MEDIUM', 'php.ini', 
-                    "Güvenli olmayan ayar: $setting");
+        return $this->encode($payload);
+    }
+    
+    // Token doğrulama
+    public function verifyToken($token) {
+        try {
+            $payload = $this->decode($token);
+            
+            // Expiration kontrolü
+            if ($payload['exp'] < time()) {
+                throw new Exception('Token expired');
             }
+            
+            // Issuer kontrolü
+            if ($payload['iss'] !== $_SERVER['HTTP_HOST']) {
+                throw new Exception('Invalid issuer');
+            }
+            
+            return $payload;
+        } catch (Exception $e) {
+            return false;
         }
     }
     
-    private function generateReport() {
-        echo "Güvenlik Tarama Raporu\\n";
-        echo "=====================\\n";
-        echo "Toplam Sorun: " . count($this->results) . "\\n\\n";
+    // Refresh token sistemi
+    public function refreshToken($old_token) {
+        $payload = $this->verifyToken($old_token);
+        if (!$payload) {
+            return false;
+        }
         
-        foreach ($this->results as $result) {
-            echo "[{$result['risk']}] {$result['type']}\\n";
-            echo "Dosya: {$result['file']}\\n";
-            echo "Açıklama: {$result['description']}\\n\\n";
+        // Refresh sadece son 5 dakikada mümkün
+        if ($payload['exp'] - time() > 300) {
+            throw new Exception('Token still valid, refresh not needed');
+        }
+        
+        return $this->createToken($payload['sub'], $payload['roles']);
+    }
+    
+    private function encode($payload) {
+        $header = json_encode(['typ' => 'JWT', 'alg' => $this->algorithm]);
+        $payload = json_encode($payload);
+        
+        $base64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+        $base64Payload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+        
+        $signature = hash_hmac('sha256', $base64Header . "." . $base64Payload, $this->secret_key, true);
+        $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+        
+        return $base64Header . "." . $base64Payload . "." . $base64Signature;
+    }
+    
+    private function decode($jwt) {
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) {
+            throw new Exception('Invalid JWT format');
+        }
+        
+        [$header, $payload, $signature] = $parts;
+        
+        $header = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $header)), true);
+        $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $payload)), true);
+        
+        // Signature verification
+        $expected_signature = str_replace(['+', '/', '='], ['-', '_', ''], 
+            base64_encode(hash_hmac('sha256', $parts[0] . "." . $parts[1], $this->secret_key, true)));
+        
+        if (!hash_equals($signature, $expected_signature)) {
+            throw new Exception('Invalid signature');
+        }
+        
+        return $payload;
+    }
+}
+
+// API Middleware
+class APISecurityMiddleware {
+    private $jwt_manager;
+    private $rate_limiter;
+    
+    public function __construct() {
+        $this->jwt_manager = new JWTManager();
+        $this->rate_limiter = new RateLimit();
+    }
+    
+    public function authenticate($required_role = null) {
+        // Rate limiting kontrolü
+        $client_ip = $_SERVER['REMOTE_ADDR'];
+        if (!$this->rate_limiter->checkLimit($client_ip, 1000, 3600)) { // 1000 req/hour
+            $this->sendError(429, 'Rate limit exceeded');
+        }
+        
+        // Authorization header kontrolü
+        $headers = getallheaders();
+        if (!isset($headers['Authorization'])) {
+            $this->sendError(401, 'Authorization header missing');
+        }
+        
+        $auth_header = $headers['Authorization'];
+        if (!preg_match('/Bearer\\s+(\\S+)/', $auth_header, $matches)) {
+            $this->sendError(401, 'Invalid authorization format');
+        }
+        
+        $token = $matches[1];
+        $payload = $this->jwt_manager->verifyToken($token);
+        
+        if (!$payload) {
+            $this->sendError(401, 'Invalid or expired token');
+        }
+        
+        // Role kontrolü
+        if ($required_role && !in_array($required_role, $payload['roles'])) {
+            $this->sendError(403, 'Insufficient permissions');
+        }
+        
+        // Request'e user bilgisini ekle
+        $_REQUEST['authenticated_user'] = [
+            'id' => $payload['sub'],
+            'roles' => $payload['roles']
+        ];
+        
+        return true;
+    }
+    
+    private function sendError($code, $message) {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => $message,
+            'code' => $code,
+            'timestamp' => date('c')
+        ]);
+        exit;
+    }
+}
+
+// API endpoint kullanımı
+$api = new APISecurityMiddleware();
+
+// Public endpoint
+if ($_SERVER['REQUEST_URI'] === '/api/public') {
+    echo json_encode(['message' => 'Public data']);
+    exit;
+}
+
+// Protected endpoint
+$api->authenticate();
+if ($_SERVER['REQUEST_URI'] === '/api/user/profile') {
+    $user = $_REQUEST['authenticated_user'];
+    echo json_encode(['user_id' => $user['id'], 'data' => 'Protected user data']);
+    exit;
+}
+
+// Admin only endpoint
+$api->authenticate('admin');
+if ($_SERVER['REQUEST_URI'] === '/api/admin/users') {
+    echo json_encode(['message' => 'Admin only data']);
+    exit;
+}`}
+            language="php"
+            type="secure"
+          />
+        </div>
+
+        {/* Database Security */}
+        <div className="space-y-4">
+          <h3 className="text-2xl font-semibold flex items-center space-x-2">
+            <Zap className="w-6 h-6 text-primary" />
+            <span>Veritabanı Güvenlik Sertleştirme</span>
+          </h3>
+          
+          <CodeExample
+            title="Veritabanı Şifreleme ve Audit Sistemi"
+            description="Hassas verilerin şifrelenmesi ve veritabanı işlemlerinin audit edilmesi."
+            secureCode={`// ✅ Veritabanı Güvenlik ve Şifreleme Sistemi
+class DatabaseSecurity {
+    private $pdo;
+    private $encryption_key;
+    
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+        $this->encryption_key = $_ENV['DB_ENCRYPTION_KEY'] ?? $this->generateKey();
+        $this->setupAuditTables();
+    }
+    
+    // AES-256-GCM ile şifreleme
+    public function encrypt($data) {
+        if (empty($data)) return $data;
+        
+        $iv = random_bytes(16);
+        $tag = '';
+        $encrypted = openssl_encrypt($data, 'aes-256-gcm', $this->encryption_key, OPENSSL_RAW_DATA, $iv, $tag);
+        
+        return base64_encode($iv . $tag . $encrypted);
+    }
+    
+    // Şifre çözme
+    public function decrypt($encrypted_data) {
+        if (empty($encrypted_data)) return $encrypted_data;
+        
+        $data = base64_decode($encrypted_data);
+        $iv = substr($data, 0, 16);
+        $tag = substr($data, 16, 16);
+        $encrypted = substr($data, 32);
+        
+        return openssl_decrypt($encrypted, 'aes-256-gcm', $this->encryption_key, OPENSSL_RAW_DATA, $iv, $tag);
+    }
+    
+    // Güvenli kullanıcı kaydetme
+    public function createUser($email, $password, $personal_data) {
+        try {
+            $this->pdo->beginTransaction();
+            
+            // Parolayı hashle
+            $password_hash = password_hash($password, PASSWORD_ARGON2ID, [
+                'memory_cost' => 65536, // 64 MB
+                'time_cost' => 4,       // 4 iterations
+                'threads' => 3          // 3 threads
+            ]);
+            
+            // Hassas verileri şifrele
+            $encrypted_phone = $this->encrypt($personal_data['phone']);
+            $encrypted_address = $this->encrypt($personal_data['address']);
+            $encrypted_ssn = $this->encrypt($personal_data['ssn']);
+            
+            // Kullanıcı oluştur
+            $stmt = $this->pdo->prepare("
+                INSERT INTO users (email, password_hash, phone_encrypted, address_encrypted, ssn_encrypted, created_at) 
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ");
+            
+            $result = $stmt->execute([
+                $email,
+                $password_hash,
+                $encrypted_phone,
+                $encrypted_address,
+                $encrypted_ssn
+            ]);
+            
+            $user_id = $this->pdo->lastInsertId();
+            
+            // Audit log
+            $this->logAuditEvent('USER_CREATED', $user_id, [
+                'email' => $email,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'user_agent' => $_SERVER['HTTP_USER_AGENT']
+            ]);
+            
+            $this->pdo->commit();
+            return $user_id;
+            
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            $this->logAuditEvent('USER_CREATE_FAILED', null, [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'ip' => $_SERVER['REMOTE_ADDR']
+            ]);
+            throw $e;
         }
     }
+    
+    // Güvenli veri okuma
+    public function getUserData($user_id) {
+        $stmt = $this->pdo->prepare("
+            SELECT email, phone_encrypted, address_encrypted, created_at,
+                   last_login, login_attempts, account_locked
+            FROM users 
+            WHERE id = ?
+        ");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch();
+        
+        if ($user) {
+            // Hassas verileri çöz
+            $user['phone'] = $this->decrypt($user['phone_encrypted']);
+            $user['address'] = $this->decrypt($user['address_encrypted']);
+            unset($user['phone_encrypted'], $user['address_encrypted']);
+            
+            // Audit log
+            $this->logAuditEvent('USER_DATA_ACCESSED', $user_id, [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'fields_accessed' => array_keys($user)
+            ]);
+        }
+        
+        return $user;
+    }
+    
+    // Audit log sistemi
+    private function logAuditEvent($event_type, $user_id, $details) {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO audit_logs (event_type, user_id, ip_address, user_agent, details, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $event_type,
+            $user_id,
+            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+            json_encode($details)
+        ]);
+    }
+    
+    // Veritabanı güvenlik analizi
+    public function securityAuditReport($days = 30) {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                event_type,
+                COUNT(*) as count,
+                COUNT(DISTINCT user_id) as unique_users,
+                COUNT(DISTINCT ip_address) as unique_ips,
+                DATE(created_at) as date
+            FROM audit_logs 
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+            GROUP BY event_type, DATE(created_at)
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$days]);
+        
+        return $stmt->fetchAll();
+    }
+    
+    // Şüpheli aktivite tespiti
+    public function detectSuspiciousActivity() {
+        $suspicious_events = [];
+        
+        // Çok fazla başarısız giriş
+        $stmt = $this->pdo->prepare("
+            SELECT ip_address, COUNT(*) as failed_attempts
+            FROM audit_logs 
+            WHERE event_type = 'LOGIN_FAILED' 
+            AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            GROUP BY ip_address 
+            HAVING failed_attempts > 10
+        ");
+        $stmt->execute();
+        $suspicious_events['brute_force'] = $stmt->fetchAll();
+        
+        // Gece vakti erişimler
+        $stmt = $this->pdo->prepare("
+            SELECT user_id, ip_address, COUNT(*) as night_access
+            FROM audit_logs 
+            WHERE HOUR(created_at) BETWEEN 0 AND 5
+            AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY user_id, ip_address
+            HAVING night_access > 5
+        ");
+        $stmt->execute();
+        $suspicious_events['night_access'] = $stmt->fetchAll();
+        
+        return $suspicious_events;
+    }
+    
+    private function setupAuditTables() {
+        $this->pdo->exec("
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                event_type VARCHAR(50) NOT NULL,
+                user_id INT NULL,
+                ip_address VARCHAR(45) NOT NULL,
+                user_agent TEXT,
+                details JSON,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_event_type (event_type),
+                INDEX idx_user_id (user_id),
+                INDEX idx_created_at (created_at)
+            )
+        ");
+    }
+    
+    private function generateKey() {
+        return base64_encode(random_bytes(32));
+    }
+}
+
+// Kullanım örneği
+$dbSecurity = new DatabaseSecurity($pdo);
+
+// Yeni kullanıcı oluşturma
+$user_id = $dbSecurity->createUser('user@example.com', 'StrongP@ssw0rd', [
+    'phone' => '+90 555 123 4567',
+    'address' => 'İstanbul, Türkiye',
+    'ssn' => '12345678901'
+]);
+
+// Güvenlik raporu
+$security_report = $dbSecurity->securityAuditReport(30);
+$suspicious_activity = $dbSecurity->detectSuspiciousActivity();`}
+            language="php"
+            type="secure"
+          />
+        </div>
+
+        {/* Security Monitoring */}
+        <div className="space-y-4">
+          <h3 className="text-2xl font-semibold flex items-center space-x-2">
+            <Search className="w-6 h-6 text-primary" />
+            <span>Güvenlik İzleme ve SIEM</span>
+          </h3>
+          
+          <CodeExample
+            title="Real-time Güvenlik İzleme Sistemi"
+            description="SIEM benzeri güvenlik olay izleme ve alarm sistemi."
+            secureCode={`// ✅ Güvenlik İzleme ve Alert Sistemi
+class SecurityMonitoring {
+    private $pdo;
+    private $alert_thresholds;
+    private $notification_channels;
+    
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+        $this->alert_thresholds = [
+            'failed_logins' => ['count' => 5, 'window' => 300], // 5 dakikada 5 başarısız
+            'suspicious_ips' => ['count' => 100, 'window' => 3600], // Saatte 100 istek
+            'data_access' => ['count' => 50, 'window' => 1800], // 30 dakikada 50 veri erişimi
+            'admin_actions' => ['count' => 1, 'window' => 0] // Her admin işlemi
+        ];
+        
+        $this->notification_channels = [
+            'email' => 'security@company.com',
+            'slack' => $_ENV['SLACK_WEBHOOK_URL'],
+            'sms' => '+90555XXXXXXX'
+        ];
+    }
+    
+    // Güvenlik olayını işle ve değerlendir
+    public function processSecurityEvent($event_type, $user_id, $ip_address, $details = []) {
+        // Event'i kaydet
+        $event_id = $this->logSecurityEvent($event_type, $user_id, $ip_address, $details);
+        
+        // Threshold kontrolü
+        $this->checkThresholds($event_type, $user_id, $ip_address);
+        
+        // Anomali tespiti
+        $this->detectAnomalies($event_type, $user_id, $ip_address, $details);
+        
+        // Real-time dashboard güncellemesi
+        $this->updateDashboard($event_type, $user_id, $ip_address);
+        
+        return $event_id;
+    }
+    
+    // Güvenlik olayını kaydet
+    private function logSecurityEvent($event_type, $user_id, $ip_address, $details) {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO security_events (
+                event_type, user_id, ip_address, user_agent, 
+                request_uri, details, severity, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $severity = $this->calculateSeverity($event_type, $details);
+        
+        $stmt->execute([
+            $event_type,
+            $user_id,
+            $ip_address,
+            $_SERVER['HTTP_USER_AGENT'] ?? '',
+            $_SERVER['REQUEST_URI'] ?? '',
+            json_encode($details),
+            $severity
+        ]);
+        
+        return $this->pdo->lastInsertId();
+    }
+    
+    // Threshold kontrolü
+    private function checkThresholds($event_type, $user_id, $ip_address) {
+        if (!isset($this->alert_thresholds[$event_type])) {
+            return;
+        }
+        
+        $threshold = $this->alert_thresholds[$event_type];
+        $window = $threshold['window'];
+        $max_count = $threshold['count'];
+        
+        if ($window > 0) {
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as event_count
+                FROM security_events 
+                WHERE event_type = ? 
+                AND (ip_address = ? OR user_id = ?)
+                AND created_at >= DATE_SUB(NOW(), INTERVAL ? SECOND)
+            ");
+            $stmt->execute([$event_type, $ip_address, $user_id, $window]);
+            
+            $count = $stmt->fetchColumn();
+            
+            if ($count >= $max_count) {
+                $this->triggerAlert($event_type, $user_id, $ip_address, [
+                    'count' => $count,
+                    'threshold' => $max_count,
+                    'window' => $window
+                ]);
+            }
+        } else {
+            // Immediate alert
+            $this->triggerAlert($event_type, $user_id, $ip_address, []);
+        }
+    }
+    
+    // Alert tetikle
+    private function triggerAlert($event_type, $user_id, $ip_address, $context) {
+        $alert_data = [
+            'id' => uniqid('ALERT_'),
+            'event_type' => $event_type,
+            'user_id' => $user_id,
+            'ip_address' => $ip_address,
+            'timestamp' => date('c'),
+            'context' => $context,
+            'severity' => $this->getAlertSeverity($event_type)
+        ];
+        
+        // Alert'i kaydet
+        $this->saveAlert($alert_data);
+        
+        // Bildirim gönder
+        $this->sendNotifications($alert_data);
+        
+        // Otomatik aksiyonlar
+        $this->executeAutomatedResponse($alert_data);
+    }
+    
+    // Anomali tespiti
+    private function detectAnomalies($event_type, $user_id, $ip_address, $details) {
+        // IP coğrafi konum kontrolü
+        if ($user_id) {
+            $this->checkGeolocationAnomaly($user_id, $ip_address);
+        }
+        
+        // Zaman anomalisi (normal saatler dışı erişim)
+        $current_hour = (int)date('H');
+        if ($current_hour < 6 || $current_hour > 22) {
+            $this->processSecurityEvent('anomaly_time', $user_id, $ip_address, [
+                'hour' => $current_hour,
+                'original_event' => $event_type
+            ]);
+        }
+        
+        // Tarayıcı/User-Agent anomalisi
+        $this->checkUserAgentAnomaly($user_id, $_SERVER['HTTP_USER_AGENT'] ?? '');
+    }
+    
+    // Coğrafi konum anomalisi
+    private function checkGeolocationAnomaly($user_id, $ip_address) {
+        // Son 24 saatteki IP'leri al
+        $stmt = $this->pdo->prepare("
+            SELECT DISTINCT ip_address
+            FROM security_events 
+            WHERE user_id = ? 
+            AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ORDER BY created_at DESC
+            LIMIT 10
+        ");
+        $stmt->execute([$user_id]);
+        $recent_ips = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (!in_array($ip_address, $recent_ips) && count($recent_ips) > 0) {
+            // Yeni IP - geolocation check gerekli
+            $this->processSecurityEvent('anomaly_geolocation', $user_id, $ip_address, [
+                'new_ip' => $ip_address,
+                'recent_ips' => $recent_ips
+            ]);
+        }
+    }
+    
+    // Otomatik güvenlik aksiyonları
+    private function executeAutomatedResponse($alert_data) {
+        switch ($alert_data['event_type']) {
+            case 'failed_logins':
+                if ($alert_data['context']['count'] >= 10) {
+                    $this->blockIP($alert_data['ip_address'], 3600); // 1 saat blok
+                }
+                break;
+                
+            case 'suspicious_ips':
+                $this->blockIP($alert_data['ip_address'], 1800); // 30 dakika blok
+                break;
+                
+            case 'admin_actions':
+                // Admin işlemlerini hemen bildir
+                $this->sendUrgentNotification($alert_data);
+                break;
+        }
+    }
+    
+    // Real-time dashboard
+    public function getDashboardData() {
+        $data = [];
+        
+        // Son 24 saatteki event'ler
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                event_type,
+                COUNT(*) as count,
+                AVG(severity) as avg_severity
+            FROM security_events 
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            GROUP BY event_type
+            ORDER BY count DESC
+        ");
+        $stmt->execute();
+        $data['events_24h'] = $stmt->fetchAll();
+        
+        // Aktif alertler
+        $stmt = $this->pdo->prepare("
+            SELECT * FROM security_alerts 
+            WHERE status = 'active' 
+            ORDER BY created_at DESC 
+            LIMIT 10
+        ");
+        $stmt->execute();
+        $data['active_alerts'] = $stmt->fetchAll();
+        
+        // En çok saldırıya uğrayan IP'ler
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                ip_address,
+                COUNT(*) as attack_count,
+                MAX(created_at) as last_attack
+            FROM security_events 
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            AND severity >= 7
+            GROUP BY ip_address
+            ORDER BY attack_count DESC
+            LIMIT 10
+        ");
+        $stmt->execute();
+        $data['top_attacking_ips'] = $stmt->fetchAll();
+        
+        return $data;
+    }
+    
+    // Güvenlik raporu oluştur
+    public function generateSecurityReport($start_date, $end_date) {
+        $report = [
+            'period' => ['start' => $start_date, 'end' => $end_date],
+            'summary' => $this->getEventSummary($start_date, $end_date),
+            'top_threats' => $this->getTopThreats($start_date, $end_date),
+            'incident_timeline' => $this->getIncidentTimeline($start_date, $end_date),
+            'recommendations' => $this->generateRecommendations($start_date, $end_date)
+        ];
+        
+        return $report;
+    }
 }`}
+            language="php"
             type="secure"
           />
         </div>
