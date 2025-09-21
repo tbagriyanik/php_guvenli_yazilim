@@ -75,6 +75,5 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 Temel yazılım güvenliği ilkelerini anlamak ve uygulamak için kapsamlı rehberiniz. 
 
 ![Ekran](<Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202025-09-21%20171041.png>)
-Temel yazılım güvenliği ilkelerini anlamak ve uygulamak için kapsamlı rehberiniz. 
 
-![Ekran](<Ekran görüntüsü 2025-09-21 162636.png>)
+Test: https://guvenliyazilim.lovable.app/
