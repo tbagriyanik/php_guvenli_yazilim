@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import BeginnerLevel from "./pages/BeginnerLevel";
 import IntermediateLevel from "./pages/IntermediateLevel";
 import AdvancedLevel from "./pages/AdvancedLevel";
+import PracticalExamples from "./pages/PracticalExamples";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/baslangic" element={<BeginnerLevel />} />
           <Route path="/orta" element={<IntermediateLevel />} />
           <Route path="/ileri" element={<AdvancedLevel />} />
+          <Route path="/uygulamali" element={<PracticalExamples />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
