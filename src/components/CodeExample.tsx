@@ -124,9 +124,9 @@ const CodeExample = ({
         <div className="relative">
           <SyntaxHighlighter
             language={language}
-            style={oneDark}
+            style={oneLight}
             customStyle={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#f8f9fc',
               padding: '1rem',
               borderRadius: '0.5rem',
               fontSize: '0.875rem',
