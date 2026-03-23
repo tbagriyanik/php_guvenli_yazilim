@@ -185,9 +185,9 @@ const CodeExample = ({
               
               <SyntaxHighlighter
                 language={language}
-                style={oneDark}
+                style={oneLight}
                 customStyle={{
-                  backgroundColor: '#1e1e1e',
+                  backgroundColor: '#f8f9fc',
                   padding: '1.5rem',
                   borderRadius: '0.5rem',
                   fontSize: '0.875rem',
