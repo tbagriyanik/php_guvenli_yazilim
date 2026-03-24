@@ -14,6 +14,7 @@ const Navigation = () => {
     { href: "/orta", label: "Orta Seviye", icon: AlertTriangle },
     { href: "/ileri", label: "İleri Seviye", icon: Zap },
     { href: "/uygulamali", label: "Uygulamalı", icon: BookOpen },
+    { href: "/senaryolar", label: "Senaryolar", icon: Target },
   ];
 
   const NavLink = ({ href, label, icon: Icon, mobile = false }) => {

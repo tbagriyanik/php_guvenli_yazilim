@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/orta" element={<IntermediateLevel />} />
           <Route path="/ileri" element={<AdvancedLevel />} />
           <Route path="/uygulamali" element={<PracticalExamples />} />
+          <Route path="/senaryolar" element={<SecurityChallenges />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
