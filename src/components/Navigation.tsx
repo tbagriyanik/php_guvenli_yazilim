@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Shield, Lock, AlertTriangle, Zap, BookOpen } from "lucide-react";
+import { Menu, Shield, Lock, AlertTriangle, Zap, BookOpen, Target } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
@@ -14,6 +14,7 @@ const Navigation = () => {
     { href: "/orta", label: "Orta Seviye", icon: AlertTriangle },
     { href: "/ileri", label: "İleri Seviye", icon: Zap },
     { href: "/uygulamali", label: "Uygulamalı", icon: BookOpen },
+    { href: "/senaryolar", label: "Senaryolar", icon: Target },
   ];
 
   const NavLink = ({ href, label, icon: Icon, mobile = false }) => {
