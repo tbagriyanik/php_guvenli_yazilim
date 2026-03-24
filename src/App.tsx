@@ -9,6 +9,7 @@ import BeginnerLevel from "./pages/BeginnerLevel";
 import IntermediateLevel from "./pages/IntermediateLevel";
 import AdvancedLevel from "./pages/AdvancedLevel";
 import PracticalExamples from "./pages/PracticalExamples";
+import SecurityChallenges from "./pages/SecurityChallenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
