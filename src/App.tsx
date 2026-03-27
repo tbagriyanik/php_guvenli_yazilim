@@ -10,6 +10,9 @@ import IntermediateLevel from "./pages/IntermediateLevel";
 import AdvancedLevel from "./pages/AdvancedLevel";
 import PracticalExamples from "./pages/PracticalExamples";
 import SecurityChallenges from "./pages/SecurityChallenges";
+import HtmlSecurity from "./pages/HtmlSecurity";
+import JavaScriptSecurity from "./pages/JavaScriptSecurity";
+import NodejsSecurity from "./pages/NodejsSecurity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +31,9 @@ const App = () => (
           <Route path="/ileri" element={<AdvancedLevel />} />
           <Route path="/uygulamali" element={<PracticalExamples />} />
           <Route path="/senaryolar" element={<SecurityChallenges />} />
+          <Route path="/html-guvenlik" element={<HtmlSecurity />} />
+          <Route path="/javascript-guvenlik" element={<JavaScriptSecurity />} />
+          <Route path="/nodejs-guvenlik" element={<NodejsSecurity />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
