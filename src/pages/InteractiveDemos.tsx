@@ -388,6 +388,216 @@ const HeaderInspectorDemo = () => {
   );
 };
 
+const EncodingDecodingDemo = () => {
+  const [input, setInput] = useState("Merhaba Dünya! <script>alert('XSS')</script>");
+  const [mode, setMode] = useState<"base64" | "url" | "html" | "hex">("base64");
+
+  const encode = (text: string, m: string) => {
+    try {
+      switch (m) {
+        case "base64": return btoa(unescape(encodeURIComponent(text)));
+        case "url": return encodeURIComponent(text);
+        case "html": return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+        case "hex": return Array.from(new TextEncoder().encode(text)).map(b => b.toString(16).padStart(2,"0")).join(" ");
+        default: return text;
+      }
+    } catch { return "Hata: Geçersiz giriş"; }
+  };
+
+  const decode = (text: string, m: string) => {
+    try {
+      switch (m) {
+        case "base64": return decodeURIComponent(escape(atob(text.trim())));
+        case "url": return decodeURIComponent(text);
+        case "html": {
+          const el = document.createElement("textarea");
+          el.innerHTML = text;
+          return el.value;
+        }
+        case "hex": return new TextDecoder().decode(new Uint8Array(text.trim().split(/\s+/).map(h => parseInt(h, 16))));
+        default: return text;
+      }
+    } catch { return "Hata: Decode edilemedi"; }
+  };
+
+  const encoded = encode(input, mode);
+  const decoded = decode(encoded, mode);
+
+  const modes = [
+    { value: "base64", label: "Base64" },
+    { value: "url", label: "URL Encode" },
+    { value: "html", label: "HTML Entities" },
+    { value: "hex", label: "Hex" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-primary" />
+            Encoding / Decoding Aracı
+          </CardTitle>
+          <CardDescription>Metni farklı formatlarda encode/decode edin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {modes.map((m) => (
+              <Button
+                key={m.value}
+                variant={mode === m.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setMode(m.value as typeof mode)}
+              >
+                {m.label}
+              </Button>
+            ))}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Girdi</label>
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="font-mono text-sm"
+              rows={3}
+            />
+          </div>
+
+          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <p className="text-xs text-muted-foreground mb-1">Encoded ({modes.find(m => m.value === mode)?.label}):</p>
+            <code className="font-mono text-sm break-all text-primary">{encoded}</code>
+          </div>
+
+          <div className="p-4 rounded-lg bg-success/5 border border-success/20">
+            <p className="text-xs text-muted-foreground mb-1">Decoded (doğrulama):</p>
+            <code className="font-mono text-sm break-all text-success">{decoded}</code>
+          </div>
+
+          <div className="p-3 rounded-lg bg-muted/50 border text-sm text-muted-foreground">
+            💡 <strong>Güvenlik notu:</strong> Encoding, XSS koruması için tek başına yeterli değildir. 
+            Ancak veri aktarımı ve depolamada önemli bir araçtır.
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const JWTDecoderDemo = () => {
+  const [jwt, setJwt] = useState(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFobWV0IFlpbG1heiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxNjIzOTAyMiwiZXhwIjoxNzE2MjQyNjIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+  );
+
+  const decodeJWT = (token: string) => {
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return null;
+      const header = JSON.parse(atob(parts[0]));
+      const payload = JSON.parse(atob(parts[1]));
+      return { header, payload, signature: parts[2] };
+    } catch {
+      return null;
+    }
+  };
+
+  const decoded = decodeJWT(jwt);
+
+  const checkExpiry = (payload: Record<string, unknown>) => {
+    if (typeof payload.exp === "number") {
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    }
+    return null;
+  };
+
+  const securityIssues = (payload: Record<string, unknown>, header: Record<string, unknown>) => {
+    const issues: string[] = [];
+    if (header.alg === "none") issues.push("⚠️ Algorithm 'none' - Token imzasız!");
+    if (header.alg === "HS256") issues.push("ℹ️ HS256 kullanılıyor - secret key güçlü olmalı");
+    if (payload.role === "admin") issues.push("⚠️ Admin rolü token'da - sunucu tarafında doğrulayın");
+    if (!payload.exp) issues.push("⚠️ Expiration (exp) yok - token süresi dolmaz!");
+    if (!payload.iat) issues.push("ℹ️ Issued At (iat) yok");
+    return issues;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileKey className="w-5 h-5 text-primary" />
+            JWT Token Decoder
+          </CardTitle>
+          <CardDescription>JWT tokenları decode edin ve güvenlik açıklarını analiz edin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-1 block">JWT Token</label>
+            <Textarea
+              value={jwt}
+              onChange={(e) => setJwt(e.target.value)}
+              className="font-mono text-xs"
+              rows={4}
+              placeholder="eyJhbGciOiJIUzI1NiIs..."
+            />
+          </div>
+
+          {decoded ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs font-medium text-primary mb-2">📋 Header</p>
+                  <pre className="font-mono text-xs overflow-x-auto">{JSON.stringify(decoded.header, null, 2)}</pre>
+                </div>
+                <div className="p-4 rounded-lg bg-accent/50 border">
+                  <p className="text-xs font-medium text-primary mb-2">📦 Payload</p>
+                  <pre className="font-mono text-xs overflow-x-auto">{JSON.stringify(decoded.payload, null, 2)}</pre>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-muted/50 border">
+                <p className="text-xs font-medium mb-2">🔑 Signature</p>
+                <code className="font-mono text-xs break-all text-muted-foreground">{decoded.signature}</code>
+              </div>
+
+              {decoded.payload.exp && (
+                <div className={`p-3 rounded-lg border flex items-center gap-2 text-sm ${
+                  checkExpiry(decoded.payload)
+                    ? "bg-destructive/10 border-destructive/30 text-destructive"
+                    : "bg-success/10 border-success/30 text-success"
+                }`}>
+                  {checkExpiry(decoded.payload) ? (
+                    <><AlertTriangle className="w-4 h-4 flex-shrink-0" /> Token süresi dolmuş! (exp: {new Date((decoded.payload.exp as number) * 1000).toLocaleString("tr-TR")})</>
+                  ) : (
+                    <><CheckCircle className="w-4 h-4 flex-shrink-0" /> Token geçerli (exp: {new Date((decoded.payload.exp as number) * 1000).toLocaleString("tr-TR")})</>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Güvenlik Analizi:</p>
+                {securityIssues(decoded.payload, decoded.header).map((issue, i) => (
+                  <div key={i} className={`p-2 rounded-lg text-sm ${
+                    issue.startsWith("⚠️") ? "bg-warning/10 border border-warning/20 text-warning" : "bg-muted/50 border text-muted-foreground"
+                  }`}>
+                    {issue}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : jwt.trim() ? (
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+              <AlertTriangle className="w-4 h-4 inline mr-2" />
+              Geçersiz JWT formatı. Token 3 parçadan (header.payload.signature) oluşmalıdır.
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const InteractiveDemos = () => {
   return (
     <div className="container mx-auto py-8 space-y-8 px-4">
@@ -407,12 +617,14 @@ const InteractiveDemos = () => {
       <Separator />
 
       <Tabs defaultValue="xss" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
-          <TabsTrigger value="xss" className="text-xs md:text-sm">XSS Saldırısı</TabsTrigger>
-          <TabsTrigger value="sql" className="text-xs md:text-sm">SQL Injection</TabsTrigger>
-          <TabsTrigger value="password" className="text-xs md:text-sm">Şifre Gücü</TabsTrigger>
-          <TabsTrigger value="csrf" className="text-xs md:text-sm">CSRF Token</TabsTrigger>
-          <TabsTrigger value="headers" className="text-xs md:text-sm">HTTP Headers</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 h-auto">
+          <TabsTrigger value="xss" className="text-xs">XSS</TabsTrigger>
+          <TabsTrigger value="sql" className="text-xs">SQL Injection</TabsTrigger>
+          <TabsTrigger value="password" className="text-xs">Şifre</TabsTrigger>
+          <TabsTrigger value="csrf" className="text-xs">CSRF</TabsTrigger>
+          <TabsTrigger value="headers" className="text-xs">Headers</TabsTrigger>
+          <TabsTrigger value="encoding" className="text-xs">Encoding</TabsTrigger>
+          <TabsTrigger value="jwt" className="text-xs">JWT</TabsTrigger>
         </TabsList>
 
         <TabsContent value="xss" className="mt-6">
@@ -429,6 +641,12 @@ const InteractiveDemos = () => {
         </TabsContent>
         <TabsContent value="headers" className="mt-6">
           <HeaderInspectorDemo />
+        </TabsContent>
+        <TabsContent value="encoding" className="mt-6">
+          <EncodingDecodingDemo />
+        </TabsContent>
+        <TabsContent value="jwt" className="mt-6">
+          <JWTDecoderDemo />
         </TabsContent>
       </Tabs>
     </div>
