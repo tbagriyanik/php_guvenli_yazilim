@@ -68,7 +68,7 @@ const Navigation = () => {
             <div className="flex flex-col space-y-4 mt-8">
               <div className="flex items-center space-x-2 mb-6">
                 <Shield className="w-6 h-6 text-primary" />
-                <span className="text-lg font-semibold gradient-text">PHP Security Guide</span>
+                <span className="text-lg font-semibold gradient-text">Web Security Guide</span>
               </div>
               {navItems.map((item) => (
                 <NavLink

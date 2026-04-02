@@ -15,7 +15,7 @@ const PracticalExamples = () => {
           <h1 className="text-4xl font-bold gradient-text">Uygulamalı Örnekler</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Gerçek dünya senaryolarına dayanan, baştan sona güvenli PHP-MySQL mini projeleri.
+          Gerçek dünya senaryolarına dayanan, baştan sona güvenli web mini projeleri.
         </p>
         <Badge className="bg-primary/20 text-primary border-primary/30 text-lg px-4 py-2">
           Tam Proje Örnekleri
