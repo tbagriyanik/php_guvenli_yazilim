@@ -13,6 +13,7 @@ import SecurityChallenges from "./pages/SecurityChallenges";
 import HtmlSecurity from "./pages/HtmlSecurity";
 import JavaScriptSecurity from "./pages/JavaScriptSecurity";
 import NodejsSecurity from "./pages/NodejsSecurity";
+import InteractiveDemos from "./pages/InteractiveDemos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
