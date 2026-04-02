@@ -18,6 +18,7 @@ const Navigation = () => {
     { href: "/html-guvenlik", label: "HTML", icon: FileCode },
     { href: "/javascript-guvenlik", label: "JavaScript", icon: Braces },
     { href: "/nodejs-guvenlik", label: "Node.js", icon: Server },
+    { href: "/denemeler", label: "Denemeler", icon: FlaskConical },
   ];
 
   const NavLink = ({ href, label, icon: Icon, mobile = false }) => {
