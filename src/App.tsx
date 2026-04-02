@@ -13,6 +13,7 @@ import SecurityChallenges from "./pages/SecurityChallenges";
 import HtmlSecurity from "./pages/HtmlSecurity";
 import JavaScriptSecurity from "./pages/JavaScriptSecurity";
 import NodejsSecurity from "./pages/NodejsSecurity";
+import InteractiveDemos from "./pages/InteractiveDemos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/html-guvenlik" element={<HtmlSecurity />} />
           <Route path="/javascript-guvenlik" element={<JavaScriptSecurity />} />
           <Route path="/nodejs-guvenlik" element={<NodejsSecurity />} />
+          <Route path="/denemeler" element={<InteractiveDemos />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

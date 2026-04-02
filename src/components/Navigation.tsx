@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Shield, Lock, AlertTriangle, Zap, BookOpen, Target, FileCode, Braces, Server } from "lucide-react";
+import { Menu, Shield, Lock, AlertTriangle, Zap, BookOpen, Target, FileCode, Braces, Server, FlaskConical } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
@@ -18,6 +18,7 @@ const Navigation = () => {
     { href: "/html-guvenlik", label: "HTML", icon: FileCode },
     { href: "/javascript-guvenlik", label: "JavaScript", icon: Braces },
     { href: "/nodejs-guvenlik", label: "Node.js", icon: Server },
+    { href: "/denemeler", label: "Denemeler", icon: FlaskConical },
   ];
 
   const NavLink = ({ href, label, icon: Icon, mobile = false }) => {
@@ -42,7 +43,7 @@ const Navigation = () => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <Shield className="w-8 h-8 text-primary animate-security-pulse" />
-          <span className="text-xl font-bold gradient-text">PHP Security Guide</span>
+          <span className="text-xl font-bold gradient-text">Web Security Guide</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -68,7 +69,7 @@ const Navigation = () => {
             <div className="flex flex-col space-y-4 mt-8">
               <div className="flex items-center space-x-2 mb-6">
                 <Shield className="w-6 h-6 text-primary" />
-                <span className="text-lg font-semibold gradient-text">PHP Security Guide</span>
+                <span className="text-lg font-semibold gradient-text">Web Security Guide</span>
               </div>
               {navItems.map((item) => (
                 <NavLink

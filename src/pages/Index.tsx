@@ -70,14 +70,14 @@ const Index = () => {
           <div className="flex items-center justify-center space-x-4 mb-6">
             <Shield className="w-16 h-16 text-primary animate-security-pulse" />
             <div className="text-left">
-              <h1 className="text-5xl font-bold gradient-text">PHP-MySQL</h1>
-              <p className="text-2xl text-muted-foreground">Güvenlik Rehberi</p>
+              <h1 className="text-5xl font-bold gradient-text">Web Güvenliği</h1>
+              <p className="text-2xl text-muted-foreground">Kapsamlı Rehber</p>
             </div>
           </div>
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Sıfırdan PHP-MySQL projesi geliştirirken alınabilecek güvenlik önlemleri ve 
-            mevcut projelerdeki açıkların tamiri için kapsamlı rehber.
+            Web projeleriniz için kapsamlı güvenlik rehberi. PHP, JavaScript, Node.js ve 
+            HTML güvenlik önlemleri ile projelerinizi koruma altına alın.
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mt-8">
