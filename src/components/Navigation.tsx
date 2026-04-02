@@ -65,12 +65,12 @@ const Navigation = () => {
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <div className="flex flex-col space-y-4 mt-8">
-              <div className="flex items-center space-x-2 mb-6">
-                <Shield className="w-6 h-6 text-primary" />
-                <span className="text-lg font-semibold gradient-text">Web Security Guide</span>
-              </div>
+          <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col">
+            <div className="flex items-center space-x-2 mb-6 mt-8">
+              <Shield className="w-6 h-6 text-primary" />
+              <span className="text-lg font-semibold gradient-text">Web Security Guide</span>
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-4 pb-8">
               {navItems.map((item) => (
                 <NavLink
                   key={item.href}
