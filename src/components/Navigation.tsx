@@ -42,7 +42,7 @@ const Navigation = () => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <Shield className="w-8 h-8 text-primary animate-security-pulse" />
-          <span className="text-xl font-bold gradient-text">PHP Security Guide</span>
+          <span className="text-xl font-bold gradient-text">Web Security Guide</span>
         </Link>
 
         {/* Desktop Navigation */}
